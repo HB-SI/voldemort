@@ -155,6 +155,10 @@ public class StorageService extends AbstractService {
                                                          voldemortConfig.getClientRoutingTimeoutMs());
     }
 
+    public FailureDetector getFailureDetector() {
+        return failureDetector;
+    }
+
     private void initStorageConfig(String configClassName) {
         try {
             Class<?> configClass = ReflectUtils.loadClass(configClassName);
