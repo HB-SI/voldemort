@@ -152,6 +152,15 @@ public abstract class AbstractFailureDetector implements FailureDetector {
         return format.format(new Date(ms));
     }
 
+    public long getFailures(Node node) {
+        checkNodeArg(node);
+        NodeStatus nodeStatus = getNodeStatus(node);
+
+        synchronized(nodeStatus) {
+            return nodeStatus.getFailure();
+        }
+    }
+
     public void destroy() {}
 
     protected void setAvailable(Node node) {

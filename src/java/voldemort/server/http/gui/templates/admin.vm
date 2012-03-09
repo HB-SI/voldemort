@@ -62,6 +62,7 @@
 	        <th>HTTP Port</th>
 	        <th>Available</th>
 	        <th>Last Check</th>
+	        <th>Failures</th>
 	      </tr>
 	    #foreach($node in $cluster.nodes)
 	   	  <tr>
@@ -69,7 +70,8 @@
 	   	    <td>$node.host</td>
 	   	    <td>$node.httpPort</td>
 	   	    <td>$failureDetector.isAvailable($node)</td>
-	   	    <td>$failureDetector.getLastCheckedFormatted($node)</td> 
+	   	    <td>$failureDetector.getLastCheckedFormatted($node)</td>
+	   	    <td>$failureDetector.getFailures($node)</td>  
 	   	  </tr>
 	    #end
 		</table>
