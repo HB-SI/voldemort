@@ -36,6 +36,7 @@ import voldemort.store.Store;
 import voldemort.store.StoreCapabilityType;
 import voldemort.store.StoreUtils;
 import voldemort.store.bdb.stats.BdbEnvironmentStats;
+import voldemort.store.bdb.stats.BdbSpaceStats;
 import voldemort.utils.ByteArray;
 import voldemort.utils.ByteUtils;
 import voldemort.utils.ClosableIterator;
@@ -56,7 +57,6 @@ import com.sleepycat.je.DatabaseStats;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.LockMode;
 import com.sleepycat.je.OperationStatus;
-import com.sleepycat.je.PreloadConfig;
 import com.sleepycat.je.StatsConfig;
 import com.sleepycat.je.Transaction;
 
@@ -78,6 +78,7 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
     private final LockMode readLockMode;
     private final Serializer<Version> versionSerializer;
     private final BdbEnvironmentStats bdbEnvironmentStats;
+    private final BdbSpaceStats bdbSpaceStats;
     private final AtomicBoolean isTruncating = new AtomicBoolean(false);
 
     public BdbStorageEngine(String name,
@@ -100,8 +101,8 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
         };
         this.isOpen = new AtomicBoolean(true);
         this.readLockMode = config.getLockMode();
-        this.bdbEnvironmentStats = new BdbEnvironmentStats(environment,
-                                                           config.getStatsCacheTtlMs());
+        this.bdbEnvironmentStats = new BdbEnvironmentStats(environment, config.getStatsCacheTtlMs());
+        this.bdbSpaceStats = new BdbSpaceStats(environment, config.getStatsCacheTtlMs());
     }
 
     public String getName() {
@@ -446,6 +447,10 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
 
     public BdbEnvironmentStats getBdbEnvironmentStats() {
         return bdbEnvironmentStats;
+    }
+
+    public BdbSpaceStats getBdbSpaceStats() {
+        return bdbSpaceStats;
     }
 
     private static abstract class BdbIterator<T> implements ClosableIterator<T> {
