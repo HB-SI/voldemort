@@ -19,6 +19,9 @@ import com.sleepycat.je.cleaner.UtilizationProfile;
 import com.sleepycat.je.dbi.EnvironmentImpl;
 import com.sleepycat.je.log.UtilizationFileReader;
 
+/**
+ * Code based in com.sleepycat.je.util.DbSpace
+ */
 public class BdbSpaceStats {
 
     private final Environment environment;
@@ -103,8 +106,8 @@ public class BdbSpaceStats {
                     summaries[fileIndex] = summary;
                 }
                 totals.add(summary);
+                fileIndex++;
             }
-            ++fileIndex;
 
             if(summaries != null) {
                 if(sorted) {
@@ -122,6 +125,7 @@ public class BdbSpaceStats {
                     summaryDetails.append("\n");
                 }
             }
+            summaryDetails.append(totals.toString());
         }
 
         public Summary getTotal() {
