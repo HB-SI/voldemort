@@ -23,12 +23,14 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.junit.Ignore;
 
 import voldemort.TestUtils;
 import voldemort.store.AbstractStorageEngineTest;
 import voldemort.store.StorageEngine;
 import voldemort.utils.ByteArray;
 
+@Ignore
 public class MysqlStorageEngineTest extends AbstractStorageEngineTest {
 
     private MysqlStorageEngine engine;
