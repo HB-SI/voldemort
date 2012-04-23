@@ -189,15 +189,13 @@ public class ClientRequestExecutor extends SelectorManagerWorker {
         if(clientRequest != null) {
             if(!clientRequest.isCompleteResponse(inputStream.getBuffer())) {
                 // Ouch - we're missing some data for a full request, so handle
-                // that
-                // and return.
+                // that and return.
                 handleIncompleteRequest(position);
                 return;
             }
 
             // At this point we have the full request (and it's not streaming),
-            // so
-            // rewind the buffer for reading and execute the request.
+            // so rewind the buffer for reading and execute the request.
             inputStream.getBuffer().rewind();
 
             if(logger.isTraceEnabled())
