@@ -44,8 +44,7 @@ public class RequestCounter {
 
     public float getThroughput() {
         Accumulator oldv = getValidAccumulator();
-        double elapsed = (time.getMilliseconds() - oldv.startTimeMS)
-                         / (double) Time.MS_PER_SECOND;
+        double elapsed = (time.getMilliseconds() - oldv.startTimeMS) / (double) Time.MS_PER_SECOND;
         if(elapsed > 0f) {
             return (float) (oldv.count / elapsed);
         } else {
@@ -54,7 +53,7 @@ public class RequestCounter {
     }
 
     public String getDisplayThroughput() {
-        return String.format("%.2f", getThroughput());
+        return String.format("%.2f", getThroughput()).replaceAll(",", ".");
     }
 
     public double getAverageTimeInMs() {
@@ -62,7 +61,7 @@ public class RequestCounter {
     }
 
     public String getDisplayAverageTimeInMs() {
-        return String.format("%.4f", getAverageTimeInMs());
+        return String.format("%.4f", getAverageTimeInMs()).replaceAll(",", ".");
     }
 
     public int getDuration() {
@@ -112,14 +111,19 @@ public class RequestCounter {
     }
 
     /**
-     * @see #addRequest(long)
-     * Detailed request to track additionald data about PUT, GET and GET_ALL
-     *
-     * @param numEmptyResponses For GET and GET_ALL, how many keys were no values found
+     * @see #addRequest(long) Detailed request to track additionald data about
+     *      PUT, GET and GET_ALL
+     * 
+     * @param numEmptyResponses For GET and GET_ALL, how many keys were no
+     *        values found
      * @param bytes Total number of bytes across all versions of values' bytes
-     * @param getAllAggregatedCount Total number of keys returned for getAll calls
+     * @param getAllAggregatedCount Total number of keys returned for getAll
+     *        calls
      */
-    public void addRequest(long timeNS, long numEmptyResponses, long bytes, long getAllAggregatedCount) {
+    public void addRequest(long timeNS,
+                           long numEmptyResponses,
+                           long bytes,
+                           long getAllAggregatedCount) {
         for(int i = 0; i < 3; i++) {
             Accumulator oldv = getValidAccumulator();
             Accumulator newv = new Accumulator(oldv.startTimeMS,
@@ -137,28 +141,32 @@ public class RequestCounter {
     }
 
     /**
-     * Return the number of requests that have returned returned no value for the requested key.  Tracked only for GET.
+     * Return the number of requests that have returned returned no value for
+     * the requested key. Tracked only for GET.
      */
     public long getNumEmptyResponses() {
         return getValidAccumulator().numEmptyResponses;
     }
 
     /**
-     * Return the size of the largest response or request in bytes returned.  Tracked only for GET, GET_ALL and PUT.
+     * Return the size of the largest response or request in bytes returned.
+     * Tracked only for GET, GET_ALL and PUT.
      */
     public long getMaxSizeInBytes() {
         return getValidAccumulator().maxBytes;
     }
 
     /**
-     * Return the average size of all the versioned values returned. Tracked only for GET, GET_ALL and PUT.
+     * Return the average size of all the versioned values returned. Tracked
+     * only for GET, GET_ALL and PUT.
      */
     public double getAverageSizeInBytes() {
         return getValidAccumulator().getAverageBytes();
     }
 
     /**
-     * Return the aggregated number of keys returned across all getAll calls, taking into account multiple values returned per call.
+     * Return the aggregated number of keys returned across all getAll calls,
+     * taking into account multiple values returned per call.
      */
     public long getGetAllAggregatedCount() {
         return getValidAccumulator().getAllAggregatedCount;
@@ -170,21 +178,40 @@ public class RequestCounter {
         final long count;
         final long totalTimeNS;
         final long total;
-        final long numEmptyResponses; // GET and GET_ALL: number of empty responses that have been returned
-        final long getAllAggregatedCount; // GET_ALL: a single call to GET_ALL can return multiple k-v pairs. Track total returned.
+        final long numEmptyResponses; // GET and GET_ALL: number of empty
+                                      // responses that have been returned
+        final long getAllAggregatedCount; // GET_ALL: a single call to GET_ALL
+                                          // can return multiple k-v pairs.
+                                          // Track total returned.
         final long maxLatencyNS;
-        final long maxBytes;     // Maximum single value
-        final long totalBytes;   // Sum of all the values
+        final long maxBytes; // Maximum single value
+        final long totalBytes; // Sum of all the values
 
         public Accumulator() {
             this(RequestCounter.this.time.getMilliseconds(), 0, 0, 0, 0, 0, 0, 0, 0);
         }
 
         public Accumulator newWithTotal() {
-            return new Accumulator(RequestCounter.this.time.getMilliseconds(), 0, 0, total, 0, 0, 0, 0, 0);
+            return new Accumulator(RequestCounter.this.time.getMilliseconds(),
+                                   0,
+                                   0,
+                                   total,
+                                   0,
+                                   0,
+                                   0,
+                                   0,
+                                   0);
         }
 
-        public Accumulator(long startTimeMS, long count, long totalTimeNS, long total, long numEmptyResponses, long maxLatencyNS, long totalBytes,  long maxBytes, long getAllAggregatedCount) {
+        public Accumulator(long startTimeMS,
+                           long count,
+                           long totalTimeNS,
+                           long total,
+                           long numEmptyResponses,
+                           long maxLatencyNS,
+                           long totalBytes,
+                           long maxBytes,
+                           long getAllAggregatedCount) {
             this.startTimeMS = startTimeMS;
             this.count = count;
             this.totalTimeNS = totalTimeNS;
