@@ -36,7 +36,6 @@ import voldemort.store.Store;
 import voldemort.store.StoreCapabilityType;
 import voldemort.store.StoreUtils;
 import voldemort.store.bdb.stats.BdbEnvironmentStats;
-import voldemort.store.bdb.stats.BdbSpaceStats;
 import voldemort.utils.ByteArray;
 import voldemort.utils.ByteUtils;
 import voldemort.utils.ClosableIterator;
@@ -49,6 +48,7 @@ import voldemort.versioning.Version;
 import voldemort.versioning.Versioned;
 
 import com.google.common.collect.Lists;
+import com.sleepycat.je.CacheMode;
 import com.sleepycat.je.Cursor;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseEntry;
@@ -78,8 +78,8 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
     private final LockMode readLockMode;
     private final Serializer<Version> versionSerializer;
     private final BdbEnvironmentStats bdbEnvironmentStats;
-    private final BdbSpaceStats bdbSpaceStats;
     private final AtomicBoolean isTruncating = new AtomicBoolean(false);
+    private final boolean minimizeScanImpact;
 
     public BdbStorageEngine(String name,
                             Environment environment,
@@ -102,7 +102,7 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
         this.isOpen = new AtomicBoolean(true);
         this.readLockMode = config.getLockMode();
         this.bdbEnvironmentStats = new BdbEnvironmentStats(environment, config.getStatsCacheTtlMs());
-        this.bdbSpaceStats = new BdbSpaceStats(environment, config.getStatsCacheTtlMs());
+        this.minimizeScanImpact = config.getMinimizeScanImpact();
     }
 
     public String getName() {
@@ -112,6 +112,9 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
     public ClosableIterator<Pair<ByteArray, Versioned<byte[]>>> entries() {
         try {
             Cursor cursor = getBdbDatabase().openCursor(null, null);
+            // evict data brought in by the cursor walk right away
+            if(this.minimizeScanImpact)
+                cursor.setCacheMode(CacheMode.EVICT_BIN);
             return new BdbEntriesIterator(cursor);
         } catch(DatabaseException e) {
             logger.error(e);
@@ -122,6 +125,9 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
     public ClosableIterator<ByteArray> keys() {
         try {
             Cursor cursor = getBdbDatabase().openCursor(null, null);
+            // evict data brought in by the cursor walk right away
+            if(this.minimizeScanImpact)
+                cursor.setCacheMode(CacheMode.EVICT_BIN);
             return new BdbKeysIterator(cursor);
         } catch(DatabaseException e) {
             logger.error(e);
@@ -449,9 +455,6 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
         return bdbEnvironmentStats;
     }
 
-    public BdbSpaceStats getBdbSpaceStats() {
-        return bdbSpaceStats;
-    }
 
     private static abstract class BdbIterator<T> implements ClosableIterator<T> {
 

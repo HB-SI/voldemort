@@ -17,6 +17,7 @@
 package voldemort.store.bdb;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.io.FileDeleteStrategy;
 
 import voldemort.TestUtils;
+import voldemort.server.protocol.admin.AsyncOperationStatus;
 import voldemort.store.AbstractStorageEngineTest;
 import voldemort.store.StorageEngine;
 import voldemort.utils.ByteArray;
@@ -40,6 +42,7 @@ import voldemort.versioning.Versioned;
 
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
+import com.sleepycat.je.Durability;
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.LockMode;
@@ -60,7 +63,7 @@ public class BdbStorageEngineTest extends AbstractStorageEngineTest {
     protected void setUp() throws Exception {
         super.setUp();
         this.envConfig = new EnvironmentConfig();
-        this.envConfig.setTxnNoSync(true);
+        this.envConfig.setDurability(Durability.COMMIT_NO_SYNC);
         this.envConfig.setAllowCreate(true);
         this.envConfig.setTransactional(true);
         this.tempDir = TestUtils.createTempDir();
@@ -153,7 +156,9 @@ public class BdbStorageEngineTest extends AbstractStorageEngineTest {
                                 VectorClock v = (VectorClock) vals.get(0).getVersion();
                                 v.incrementVersion(0, System.currentTimeMillis());
                                 try {
-                                    store.put(new ByteArray(keyBytes), new Versioned<byte[]>(valueBytes, v), null);
+                                    store.put(new ByteArray(keyBytes),
+                                              new Versioned<byte[]>(valueBytes, v),
+                                              null);
                                 } catch(ObsoleteVersionException e) {
                                     // Ignore these
                                 }
