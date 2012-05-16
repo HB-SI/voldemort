@@ -31,7 +31,7 @@ call %VOLDEMORT_CONFIG_DIR%/voldemort-env.bat
 
 for %%j in (%BASE_DIR%\dist\*.jar) do (call :append_classpath "%%j")
 for %%j in (%BASE_DIR%\lib\*.jar) do (call :append_classpath "%%j")
-set CLASSPATH=$CLASSPATH:%BASE_DIR%\dist\resources
+set CLASSPATH=%CLASSPATH%;%BASE_DIR%\dist\resources
 goto :run
 
 :append_classpath

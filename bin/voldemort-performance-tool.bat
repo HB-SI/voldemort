@@ -16,6 +16,6 @@ REM  See the License for the specific language governing permissions and
 REM  limitations under the License.
 REM
 
-SET BASE_DIR=%~dp0
+SET BASE_DIR=%~dp0..
 
-call %BASE_DIR%run-class.bat voldemort.performance.benchmark.Benchmark %*
+call %BASE_DIR%/bin/run-class.bat voldemort.performance.benchmark.Benchmark %*
