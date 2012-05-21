@@ -99,6 +99,10 @@ public class BdbStorageConfiguration implements StorageConfiguration {
                                          Boolean.toString(config.getBdbCheckpointerHighPriority()));
         environmentConfig.setConfigParam(EnvironmentConfig.CLEANER_MAX_BATCH_FILES,
                                          Integer.toString(config.getBdbCleanerMaxBatchFiles()));
+        environmentConfig.setConfigParam(EnvironmentConfig.LOG_FAULT_READ_SIZE,
+                                         Integer.toString(config.getBdbLogFaultReadSize()));
+        environmentConfig.setConfigParam(EnvironmentConfig.LOG_ITERATOR_READ_SIZE,
+                                         Integer.toString(config.getBdbLogIteratorReadSize()));
         environmentConfig.setConfigParam(EnvironmentConfig.CLEANER_LAZY_MIGRATION,
                                          Boolean.toString(config.getBdbCleanerLazyMigration()));
 

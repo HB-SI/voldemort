@@ -101,7 +101,9 @@ public class BdbStorageEngine implements StorageEngine<ByteArray, byte[], byte[]
         };
         this.isOpen = new AtomicBoolean(true);
         this.readLockMode = config.getLockMode();
-        this.bdbEnvironmentStats = new BdbEnvironmentStats(environment, config.getStatsCacheTtlMs());
+        this.bdbEnvironmentStats = new BdbEnvironmentStats(environment,
+                                                           config.getStatsCacheTtlMs(),
+                                                           config.getExposeSpaceUtil());
         this.minimizeScanImpact = config.getMinimizeScanImpact();
     }
 

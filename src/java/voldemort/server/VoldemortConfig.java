@@ -77,10 +77,13 @@ public class VoldemortConfig implements Serializable {
     private int bdbCleanerThreads;
     private long bdbLockTimeoutMs;
     private int bdbLockNLockTables;
+    private int bdbLogFaultReadSize;
+    private int bdbLogIteratorReadSize;
     private boolean bdbFairLatches;
     private long bdbStatsCacheTtlMs;
     private boolean bdbCacheModeEvictLN;
     private boolean bdbMinimizeScanImpact;
+    private boolean bdbExposeSpaceUtilization;
 
     private String mysqlUsername;
     private String mysqlPassword;
@@ -208,6 +211,8 @@ public class VoldemortConfig implements Serializable {
         this.bdbCleanerLookAheadCacheSize = props.getInt("bdb.cleaner.lookahead.cache.size", 8192);
         this.bdbLockTimeoutMs = props.getLong("bdb.lock.timeout.ms", 500);
         this.bdbLockNLockTables = props.getInt("bdb.lock.nLockTables", 1);
+        this.bdbLogFaultReadSize = props.getInt("bdb.log.fault.read.size", 2048);
+        this.bdbLogIteratorReadSize = props.getInt("bdb.log.iterator.read.size", 8192);
         this.bdbFairLatches = props.getBoolean("bdb.fair.latches", false);
         this.bdbCheckpointerHighPriority = props.getBoolean("bdb.checkpointer.high.priority", false);
         this.bdbCleanerLazyMigration = props.getBoolean("bdb.cleaner.lazy.migration", true);
@@ -216,6 +221,7 @@ public class VoldemortConfig implements Serializable {
         this.bdbStatsCacheTtlMs = props.getLong("bdb.stats.cache.ttl.ms", 5 * Time.MS_PER_SECOND);
         this.bdbCacheModeEvictLN = props.getBoolean("bdb.cache.evictln", false);
         this.bdbMinimizeScanImpact = props.getBoolean("bdb.minimize.scan.impact", false);
+        this.bdbExposeSpaceUtilization = props.getBoolean("bdb.expose.space.utilization", true);
 
         this.readOnlyBackups = props.getInt("readonly.backups", 1);
         this.readOnlySearchStrategy = props.getString("readonly.search.strategy",
@@ -671,6 +677,22 @@ public class VoldemortConfig implements Serializable {
         return bdbLockNLockTables;
     }
 
+    public void setBdbLogFaultReadSize(int bdbLogFaultReadSize) {
+        this.bdbLogFaultReadSize = bdbLogFaultReadSize;
+    }
+
+    public int getBdbLogFaultReadSize() {
+        return bdbLogFaultReadSize;
+    }
+
+    public void setBdbLogIteratorReadSize(int bdbLogIteratorReadSize) {
+        this.bdbLogIteratorReadSize = bdbLogIteratorReadSize;
+    }
+
+    public int getBdbLogIteratorReadSize() {
+        return bdbLogIteratorReadSize;
+    }
+
     public boolean getBdbFairLatches() {
         return bdbFairLatches;
     }
@@ -707,6 +729,19 @@ public class VoldemortConfig implements Serializable {
         if(minUtilization < 0 || minUtilization > 90)
             throw new IllegalArgumentException("minUtilization should be between 0 and 90 (both inclusive)");
         this.bdbCleanerMinUtilization = minUtilization;
+    }
+
+    /**
+     * This parameter controls whether we expose space utilization via MBean. If
+     * set to false, stat will always return 0;
+     * 
+     */
+    public boolean getBdbExposeSpaceUtilization() {
+        return bdbExposeSpaceUtilization;
+    }
+
+    public void setBdbExposeSpaceUtilization(boolean bdbExposeSpaceUtilization) {
+        this.bdbExposeSpaceUtilization = bdbExposeSpaceUtilization;
     }
 
     /**

@@ -46,8 +46,7 @@ public class JNAUtils {
         try {
             if(isOperatingSystem("windows"))
                 return;
-            // Since we demand-zero every page of the heap while bringing up
-            // the
+            // Since we demand-zero every page of the heap while bringing up the
             // jvm, MCL_FUTURE is not needed
             mlockall(MCL_CURRENT);
             logger.info("mlockall() on JVM Heap successful");
