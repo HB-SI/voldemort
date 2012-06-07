@@ -21,6 +21,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import voldemort.VoldemortException;
+import voldemort.store.StoreTimeoutException;
 import voldemort.store.UnreachableStoreException;
 
 /**
@@ -39,6 +40,8 @@ public abstract class AbstractClientRequest<T> implements ClientRequest<T> {
     private volatile boolean isComplete = false;
 
     private volatile boolean isParsed = false;
+
+    private volatile boolean isTimedOut = false;
 
     protected abstract void formatRequestInternal(DataOutputStream outputStream) throws IOException;
 
@@ -71,6 +74,9 @@ public abstract class AbstractClientRequest<T> implements ClientRequest<T> {
     }
 
     public T getResult() throws VoldemortException, IOException {
+        if(isTimedOut)
+            throw new StoreTimeoutException("Request timed out");
+
         if(!isComplete)
             throw new IllegalStateException("Client response not complete, cannot determine result");
 
@@ -91,6 +97,14 @@ public abstract class AbstractClientRequest<T> implements ClientRequest<T> {
 
     public boolean isComplete() {
         return isComplete;
+    }
+
+    public final void timeOut() {
+        isTimedOut = true;
+    }
+
+    public boolean isTimedOut() {
+        return isTimedOut;
     }
 
 }

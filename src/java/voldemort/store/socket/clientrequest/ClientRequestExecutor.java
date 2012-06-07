@@ -28,7 +28,6 @@ import java.nio.channels.SocketChannel;
 
 import org.apache.log4j.Level;
 
-import voldemort.utils.SelectorManager;
 import voldemort.utils.SelectorManagerWorker;
 import voldemort.utils.Time;
 
@@ -51,11 +50,13 @@ public class ClientRequestExecutor extends SelectorManagerWorker {
     private ClientRequest<?> clientRequest;
 
     private long expiration;
+    private boolean isExpired;
 
     public ClientRequestExecutor(Selector selector,
                                  SocketChannel socketChannel,
                                  int socketBufferSize) {
         super(selector, socketChannel, socketBufferSize);
+        isExpired = false;
     }
 
     public SocketChannel getSocketChannel() {
@@ -80,6 +81,7 @@ public class ClientRequestExecutor extends SelectorManagerWorker {
         if(logger.isEnabledFor(Level.WARN))
             logger.warn("Client request associated with " + socketChannel.socket() + " timed out");
 
+        isExpired = true;
         close();
 
         return false;
@@ -98,7 +100,6 @@ public class ClientRequestExecutor extends SelectorManagerWorker {
         if(timeoutMs == -1) {
             this.expiration = -1;
         } else {
-            timeoutMs -= SelectorManager.SELECTOR_POLL_MS;
             this.expiration = System.nanoTime() + (Time.NS_PER_MS * timeoutMs);
 
             if(this.expiration < System.nanoTime())
@@ -186,31 +187,40 @@ public class ClientRequestExecutor extends SelectorManagerWorker {
         // the position to 0 in preparation for reading in the RequestHandler.
         inputStream.getBuffer().flip();
 
-        if(clientRequest != null) {
-            if(!clientRequest.isCompleteResponse(inputStream.getBuffer())) {
-                // Ouch - we're missing some data for a full request, so handle
-                // that and return.
-                handleIncompleteRequest(position);
-                return;
+        try {
+            if(clientRequest != null) {
+                if(!clientRequest.isCompleteResponse(inputStream.getBuffer())) {
+                    // Ouch - we're missing some data for a full request, so
+                    // handle
+                    // that and return.
+                    handleIncompleteRequest(position);
+                    return;
+                }
+
+                // At this point we have the full request (and it's not
+                // streaming),
+                // so rewind the buffer for reading and execute the request.
+                inputStream.getBuffer().rewind();
+
+                if(logger.isTraceEnabled())
+                    logger.trace("Starting read for " + socketChannel.socket());
+
+                clientRequest.parseResponse(new DataInputStream(inputStream));
             }
+        } finally {
+            // The try-finally will protect us against clientRequest
+            // NullPointerExceptions due to the synchronize nature of the
+            // variable.
 
-            // At this point we have the full request (and it's not streaming),
-            // so rewind the buffer for reading and execute the request.
-            inputStream.getBuffer().rewind();
-
+            // At this point we've completed a full stand-alone request. So
+            // clear
+            // our input buffer and prepare for outputting back to the client.
             if(logger.isTraceEnabled())
-                logger.trace("Starting read for " + socketChannel.socket());
+                logger.trace("Finished read for " + socketChannel.socket());
 
-            clientRequest.parseResponse(new DataInputStream(inputStream));
+            selectionKey.interestOps(0);
+            completeClientRequest();
         }
-
-        // At this point we've completed a full stand-alone request. So clear
-        // our input buffer and prepare for outputting back to the client.
-        if(logger.isTraceEnabled())
-            logger.trace("Finished read for " + socketChannel.socket());
-
-        selectionKey.interestOps(0);
-        completeClientRequest();
     }
 
     @Override
@@ -271,7 +281,10 @@ public class ClientRequestExecutor extends SelectorManagerWorker {
         clientRequest = null;
         expiration = 0;
 
-        local.complete();
+        if(isExpired)
+            local.timeOut();
+        else
+            local.complete();
 
         if(logger.isTraceEnabled())
             logger.trace("Marked client associated with " + socketChannel.socket() + " as complete");
