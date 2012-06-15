@@ -33,7 +33,6 @@ import voldemort.server.RequestRoutingType;
 import voldemort.store.NoSuchCapabilityException;
 import voldemort.store.Store;
 import voldemort.store.StoreCapabilityType;
-import voldemort.store.StoreTimeoutException;
 import voldemort.store.StoreUtils;
 import voldemort.store.UnreachableStoreException;
 import voldemort.store.nonblockingstore.NonblockingStore;
@@ -334,25 +333,29 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
             this.startNs = System.nanoTime();
         }
 
-        private void invokeCallback(Object o, long requestTime) {
-                if(callback != null) {
-                    try {
-                    callback.requestComplete(o, requestTime);
-                    } catch(Exception e) {
-                        if(logger.isEnabledFor(Level.WARN))
-                            logger.warn(e, e);
-                    }
-                }
-                }
-
         public void complete() {
             try {
                 clientRequest.complete();
                 Object result = clientRequest.getResult();
 
-                invokeCallback(result, (System.nanoTime() - startNs) / Time.NS_PER_MS);
+                if(callback != null) {
+                    try {
+                        callback.requestComplete(result, (System.nanoTime() - startNs)
+                                                         / Time.NS_PER_MS);
+                    } catch(Exception e) {
+                        if(logger.isEnabledFor(Level.WARN))
+                            logger.warn(e, e);
+                    }
+                }
             } catch(Exception e) {
-                invokeCallback(e, (System.nanoTime() - startNs) / Time.NS_PER_MS);
+                if(callback != null) {
+                    try {
+                        callback.requestComplete(e, (System.nanoTime() - startNs) / Time.NS_PER_MS);
+                    } catch(Exception ex) {
+                        if(logger.isEnabledFor(Level.WARN))
+                            logger.warn(ex, ex);
+                    }
+                }
             } finally {
                 pool.checkin(destination, clientRequestExecutor);
                 isComplete = true;
@@ -379,16 +382,6 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
             clientRequest.parseResponse(inputStream);
         }
 
-        public void timeOut() {
-            clientRequest.timeOut();
-            invokeCallback(new StoreTimeoutException("ClientRequestExecutor timed out. Cannot complete request."),
-                           (System.nanoTime() - startNs) / Time.NS_PER_MS);
-            pool.checkin(destination, clientRequestExecutor);
-        }
-
-        public boolean isTimedOut() {
-            return clientRequest.isTimedOut();
-        }
     }
 
 }
