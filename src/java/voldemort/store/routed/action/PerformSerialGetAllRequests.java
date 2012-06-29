@@ -30,8 +30,8 @@ import voldemort.store.InsufficientOperationalNodesException;
 import voldemort.store.Store;
 import voldemort.store.routed.GetAllPipelineData;
 import voldemort.store.routed.Pipeline;
-import voldemort.store.routed.Response;
 import voldemort.store.routed.Pipeline.Event;
+import voldemort.store.routed.Response;
 import voldemort.utils.ByteArray;
 import voldemort.utils.Time;
 import voldemort.versioning.Versioned;
@@ -75,7 +75,7 @@ public class PerformSerialGetAllRequests
             MutableInt successCount = pipelineData.getSuccessCount(key);
 
             if(successCount.intValue() >= preferred) {
-                if(pipelineData.getZonesRequired() != null) {
+                if(pipelineData.getZonesRequired() != null && pipelineData.getZonesRequired() > 0) {
 
                     if(pipelineData.getKeyToZoneResponse().containsKey(key)) {
                         int zonesSatisfied = pipelineData.getKeyToZoneResponse().get(key).size();
