@@ -292,6 +292,7 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
 
             return blockingClientRequest.getResult();
         } catch(InterruptedException e) {
+			clientRequestExecutor.close();
 
             if(logger.isDebugEnabled())
                 debugMsgStr += "unreachable: " + e.getMessage();
