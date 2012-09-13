@@ -379,6 +379,7 @@
         <fileset dir="${unittestsrc.dir}">
           <include name="**/*Test.java" />
           <exclude name="**/Abstract*.java" />
+          <exclude name="**/Mysql*.java" />
         </fileset>
       </batchtest>
     </junit>
@@ -399,6 +400,7 @@
       <batchtest fork="yes" todir="${longtestreport.dir}">
         <fileset dir="${longtestsrc.dir}">
           <include name="**/*Test.java" />
+          <exclude name="**/Mysql*.java" />
         </fileset>
       </batchtest>
     </junit>
