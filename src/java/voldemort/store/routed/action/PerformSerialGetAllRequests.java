@@ -85,7 +85,7 @@ public class PerformSerialGetAllRequests
 			     + " required: " + required);
 
             if(successCount.intValue() >= preferred) {
-                if(pipelineData.getZonesRequired() != null) {
+                if(pipelineData.getZonesRequired() != null && pipelineData.getZonesRequired() > 0) {
 
                     if(pipelineData.getKeyToZoneResponse().containsKey(key)) {
                         int zonesSatisfied = pipelineData.getKeyToZoneResponse().get(key).size();
@@ -120,10 +120,12 @@ public class PerformSerialGetAllRequests
                     else
                         values = store.get(key, transforms.get(key));
 
-                    if(result.get(key) == null)
-                        result.put(key, Lists.newArrayList(values));
-                    else
-                        result.get(key).addAll(values);
+                    if(values.size() != 0) {
+	                    if(result.get(key) == null)
+	                        result.put(key, Lists.newArrayList(values));
+	                    else
+	                        result.get(key).addAll(values);
+                    }
 
                     Map<ByteArray, List<Versioned<byte[]>>> map = new HashMap<ByteArray, List<Versioned<byte[]>>>();
                     map.put(key, values);
@@ -149,6 +151,7 @@ public class PerformSerialGetAllRequests
                         zoneResponses = pipelineData.getKeyToZoneResponse().get(key);
                     } else {
                         zoneResponses = new HashSet<Integer>();
+                        pipelineData.getKeyToZoneResponse().put(key, zoneResponses);
                     }
                     zoneResponses.add(response.getNode().getZoneId());
 

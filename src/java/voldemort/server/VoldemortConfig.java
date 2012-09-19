@@ -76,6 +76,7 @@ public class VoldemortConfig implements Serializable {
     private int bdbCleanerMinUtilization;
     private int bdbCleanerLookAheadCacheSize;
     private boolean bdbCheckpointerHighPriority;
+    private boolean bdbCleanerLazyMigration;
     private int bdbCleanerMaxBatchFiles;
     private boolean bdbReadUncommitted;
     private int bdbCleanerThreads;
@@ -85,6 +86,8 @@ public class VoldemortConfig implements Serializable {
     private int bdbLogIteratorReadSize;
     private boolean bdbFairLatches;
     private long bdbStatsCacheTtlMs;
+    private boolean bdbCacheModeEvictLN;
+    private boolean bdbMinimizeScanImpact;
     private boolean bdbExposeSpaceUtilization;
     private long bdbMinimumSharedCache;
 
@@ -225,9 +228,12 @@ public class VoldemortConfig implements Serializable {
         this.bdbLogIteratorReadSize = props.getInt("bdb.log.iterator.read.size", 8192);
         this.bdbFairLatches = props.getBoolean("bdb.fair.latches", false);
         this.bdbCheckpointerHighPriority = props.getBoolean("bdb.checkpointer.high.priority", false);
+        this.bdbCleanerLazyMigration = props.getBoolean("bdb.cleaner.lazy.migration", true);
         this.bdbCleanerMaxBatchFiles = props.getInt("bdb.cleaner.max.batch.files", 0);
         this.bdbReadUncommitted = props.getBoolean("bdb.lock.read_uncommitted", true);
         this.bdbStatsCacheTtlMs = props.getLong("bdb.stats.cache.ttl.ms", 5 * Time.MS_PER_SECOND);
+        this.bdbCacheModeEvictLN = props.getBoolean("bdb.cache.evictln", false);
+        this.bdbMinimizeScanImpact = props.getBoolean("bdb.minimize.scan.impact", false);
         this.bdbExposeSpaceUtilization = props.getBoolean("bdb.expose.space.utilization", true);
         this.bdbMinimumSharedCache = props.getLong("bdb.minimum.shared.cache", 0);
 
@@ -551,19 +557,6 @@ public class VoldemortConfig implements Serializable {
     }
 
     /**
-     * This parameter controls whether we expose space utilization via MBean. If
-     * set to false, stat will always return 0;
-     * 
-     */
-    public boolean getBdbExposeSpaceUtilization() {
-        return bdbExposeSpaceUtilization;
-    }
-
-    public void setBdbExposeSpaceUtilization(boolean bdbExposeSpaceUtilization) {
-        this.bdbExposeSpaceUtilization = bdbExposeSpaceUtilization;
-    }
-
-    /**
      * Given by "bdb.flush.transactions". If true then sync transactions to disk
      * immediately. default: false
      */
@@ -635,6 +628,25 @@ public class VoldemortConfig implements Serializable {
 
     public final void setBdbCheckpointerHighPriority(boolean bdbCheckpointerHighPriority) {
         this.bdbCheckpointerHighPriority = bdbCheckpointerHighPriority;
+    }
+
+    /**
+     * If true, Cleaner offloads some work to application threads, to keep up
+     * with the write rate.
+     * 
+     * <ul>
+     * <li>property: "bdb.cleaner.lazy.migration"</li>
+     * <li>default : true</li>
+     * </ul>
+     * 
+     * @return
+     */
+    public boolean getBdbCleanerLazyMigration() {
+        return bdbCleanerLazyMigration;
+    }
+
+    public final void setBdbCleanerLazyMigration(boolean bdbCleanerLazyMigration) {
+        this.bdbCleanerLazyMigration = bdbCleanerLazyMigration;
     }
 
     /**
@@ -777,6 +789,19 @@ public class VoldemortConfig implements Serializable {
     }
 
     /**
+     * This parameter controls whether we expose space utilization via MBean. If
+     * set to false, stat will always return 0;
+     * 
+     */
+    public boolean getBdbExposeSpaceUtilization() {
+        return bdbExposeSpaceUtilization;
+    }
+
+    public void setBdbExposeSpaceUtilization(boolean bdbExposeSpaceUtilization) {
+        this.bdbExposeSpaceUtilization = bdbExposeSpaceUtilization;
+    }
+
+    /**
      * 
      * The btree node fanout. Given by "bdb.btree.fanout". default: 512
      */
@@ -786,6 +811,43 @@ public class VoldemortConfig implements Serializable {
 
     public void setBdbBtreeFanout(int bdbBtreeFanout) {
         this.bdbBtreeFanout = bdbBtreeFanout;
+    }
+
+    /**
+     * If true, BDB will not cache data in the JVM.
+     * 
+     * <ul>
+     * <li>Property : "bdb.cache.evictln"</li>
+     * <li>Default : false</li>
+     * </ul>
+     * 
+     * @return
+     */
+    public boolean getBdbCacheModeEvictLN() {
+        return bdbCacheModeEvictLN;
+    }
+
+    public void setBdbCacheModeEvictLN(boolean bdbCacheModeEvictLN) {
+        this.bdbCacheModeEvictLN = bdbCacheModeEvictLN;
+    }
+
+    /**
+     * If true, attempts are made to minimize impact to BDB cache during scan
+     * jobs
+     * 
+     * <ul>
+     * <li>Property : "bdb.minimize.scan.impact"</li>
+     * <li>Default : false</li>
+     * </ul>
+     * 
+     * @return
+     */
+    public boolean getBdbMinimizeScanImpact() {
+        return bdbMinimizeScanImpact;
+    }
+
+    public void setBdbMinimizeScanImpact(boolean bdbMinimizeScanImpact) {
+        this.bdbMinimizeScanImpact = bdbMinimizeScanImpact;
     }
 
     /**

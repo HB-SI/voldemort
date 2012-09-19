@@ -49,6 +49,7 @@ public class ClientRequestExecutorPool implements SocketStoreFactory {
     private final KeyedResourcePool<SocketDestination, ClientRequestExecutor> pool;
     private final ClientRequestExecutorFactory factory;
     private final ClientSocketStats stats;
+    private final boolean jmxEnabled;
 
     public ClientRequestExecutorPool(int selectors,
                                      int maxConnectionsPerNode,
@@ -56,13 +57,14 @@ public class ClientRequestExecutorPool implements SocketStoreFactory {
                                      int soTimeoutMs,
                                      int socketBufferSize,
                                      boolean socketKeepAlive,
-                                     boolean enableJmx) {
+                                     boolean jmxEnabled) {
         ResourcePoolConfig config = new ResourcePoolConfig().setIsFair(true)
                                                             .setMaxPoolSize(maxConnectionsPerNode)
                                                             .setMaxInvalidAttempts(maxConnectionsPerNode)
                                                             .setTimeout(connectionTimeoutMs,
                                                                         TimeUnit.MILLISECONDS);
-        if(enableJmx) {
+		this.jmxEnabled = jmxEnabled;        
+		if(this.jmxEnabled) {
             stats = new ClientSocketStats();
             JmxUtils.registerMbean(new ClientSocketStatsJmx(stats),
                                    JmxUtils.createObjectName(JmxUtils.getPackageName(this.getClass()),
@@ -177,8 +179,9 @@ public class ClientRequestExecutorPool implements SocketStoreFactory {
         // unregister MBeans
         if(stats != null) {
             try {
-                JmxUtils.unregisterMbean(JmxUtils.createObjectName(JmxUtils.getPackageName(ClientRequestExecutor.class),
-                                                                   "aggregated"));
+				if(this.jmxEnabled)
+                	JmxUtils.unregisterMbean(JmxUtils.createObjectName(JmxUtils.getPackageName(this.getClass()),
+                    	                                               "aggregated"));
             } catch(Exception e) {}
             stats.close();
         }

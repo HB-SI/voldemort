@@ -287,7 +287,7 @@ public class VoldemortClientShell {
                     System.out.println("k k thx bye.");
                     System.exit(0);
                 } else {
-                    System.err.println("Invalid command.");
+                    System.err.println("Invalid command. (Try 'help' for usage.)");
                 }
             } catch(EndOfFileException e) {
                 System.err.println("Expected additional token.");
@@ -298,7 +298,7 @@ public class VoldemortClientShell {
                 System.err.println("Exception thrown during operation.");
                 e.printStackTrace(System.err);
             } catch(ArrayIndexOutOfBoundsException e) {
-                System.err.println("Invalid command.");
+                System.err.println("Invalid command. (Try 'help' for usage.)");
             } catch(Exception e) {
                 System.err.println("Unexpected error:");
                 e.printStackTrace(System.err);

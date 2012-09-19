@@ -155,6 +155,7 @@ public class PerformParallelGetAllRequests
                         zoneResponses = pipelineData.getKeyToZoneResponse().get(key);
                     } else {
                         zoneResponses = new HashSet<Integer>();
+                        pipelineData.getKeyToZoneResponse().put(key, zoneResponses);
                     }
                     zoneResponses.add(response.getNode().getZoneId());
                 }

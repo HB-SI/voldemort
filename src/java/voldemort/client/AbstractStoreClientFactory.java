@@ -400,8 +400,19 @@ public abstract class AbstractStoreClientFactory implements StoreClientFactory {
             this.threadPool.shutdownNow();
         }
 
-        if(failureDetector != null)
+        if(failureDetector != null) {
             failureDetector.destroy();
+            if(isJmxEnabled) {
+                JmxUtils.unregisterMbean(JmxUtils.createObjectName(JmxUtils.getPackageName(failureDetector.getClass()),
+                                                                   JmxUtils.getClassName(failureDetector.getClass())
+                                                                           + jmxId()));
+                JmxUtils.unregisterMbean(JmxUtils.createObjectName(JmxUtils.getPackageName(threadPool.getClass()),
+                                                                   JmxUtils.getClassName(threadPool.getClass())
+                                                                           + jmxId()));
+                JmxUtils.unregisterMbean(JmxUtils.createObjectName("voldemort.store.stats.aggregate",
+                                                                   "aggregate-perf" + jmxId()));
+            }
+        }
     }
 
     /* Give a unique id to avoid jmx clashes */
