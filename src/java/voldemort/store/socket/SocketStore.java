@@ -254,6 +254,9 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
             clientRequestExecutor.close();
             throw new UnreachableStoreException("Failure in " + operationName + " on "
                                                 + destination + ": " + e.getMessage(), e);
+        } catch(IllegalStateException e) {
+            clientRequestExecutor.close();
+            throw e;
         } finally {
             if(blockingClientRequest != null && !blockingClientRequest.isComplete()) {
                 // close the executor if we timed out

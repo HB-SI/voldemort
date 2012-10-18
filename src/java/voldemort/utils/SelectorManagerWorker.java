@@ -111,9 +111,13 @@ public abstract class SelectorManagerWorker implements Runnable {
         } catch(EOFException e) {
             close();
         } catch(IOException e) {
-            logger.info("Connection reset from " + socketChannel.socket() + " with message - "
-                        + e.getMessage());
+            // Close first to avoid a potential
+            // "java.net.SocketException: Socket operation on nonsocket: getsockname"
+            // when printing the log
             close();
+            if(logger.isEnabledFor(Level.INFO))
+                logger.info("Connection reset from " + socketChannel.socket() + " with message - "
+                            + e.getMessage());
         } catch(Throwable t) {
             if(logger.isEnabledFor(Level.ERROR))
                 logger.error(t.getMessage(), t);
