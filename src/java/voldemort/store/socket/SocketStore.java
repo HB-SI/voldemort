@@ -247,20 +247,20 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
             blockingClientRequest.await();
             return blockingClientRequest.getResult();
         } catch(InterruptedException e) {
-            clientRequestExecutor.close();
+            pool.getFactory().destroy(destination, clientRequestExecutor);
             throw new UnreachableStoreException("Failure in " + operationName + " on "
                                                 + destination + ": " + e.getMessage(), e);
         } catch(IOException e) {
-            clientRequestExecutor.close();
+            pool.getFactory().destroy(destination, clientRequestExecutor);
             throw new UnreachableStoreException("Failure in " + operationName + " on "
                                                 + destination + ": " + e.getMessage(), e);
         } catch(IllegalStateException e) {
-            clientRequestExecutor.close();
+            pool.getFactory().destroy(destination, clientRequestExecutor);
             throw e;
         } finally {
             if(blockingClientRequest != null && !blockingClientRequest.isComplete()) {
                 // close the executor if we timed out
-                clientRequestExecutor.close();
+                pool.getFactory().destroy(destination, clientRequestExecutor);
             }
             pool.checkin(destination, clientRequestExecutor);
         }

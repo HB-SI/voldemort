@@ -90,8 +90,7 @@ public class ClientRequestExecutorFactory implements
      * Close the ClientRequestExecutor.
      */
 
-    public void destroy(SocketDestination dest, ClientRequestExecutor clientRequestExecutor)
-            throws Exception {
+    public void destroy(SocketDestination dest, ClientRequestExecutor clientRequestExecutor) {
         clientRequestExecutor.close();
         int numDestroyed = destroyed.incrementAndGet();
 
