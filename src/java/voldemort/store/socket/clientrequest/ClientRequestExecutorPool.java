@@ -63,7 +63,7 @@ public class ClientRequestExecutorPool implements SocketStoreFactory {
                                                             .setMaxInvalidAttempts(maxConnectionsPerNode)
                                                             .setTimeout(connectionTimeoutMs,
                                                                         TimeUnit.MILLISECONDS);
-		this.jmxEnabled = jmxEnabled;        
+		this.jmxEnabled = jmxEnabled;
 		if(this.jmxEnabled) {
             stats = new ClientSocketStats();
             JmxUtils.registerMbean(new ClientSocketStatsJmx(stats),

@@ -292,7 +292,7 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
 
             return blockingClientRequest.getResult();
         } catch(InterruptedException e) {
-			clientRequestExecutor.close();
+            pool.getFactory().destroy(destination, clientRequestExecutor);
 
             if(logger.isDebugEnabled())
                 debugMsgStr += "unreachable: " + e.getMessage();
@@ -300,7 +300,7 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
             throw new UnreachableStoreException("Failure in " + operationName + " on "
                                                 + destination + ": " + e.getMessage(), e);
         } catch(IOException e) {
-            clientRequestExecutor.close();
+            pool.getFactory().destroy(destination, clientRequestExecutor);
 
             if(logger.isDebugEnabled())
                 debugMsgStr += "failure: " + e.getMessage();
@@ -310,7 +310,7 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
         } finally {
             if(blockingClientRequest != null && !blockingClientRequest.isComplete()) {
                 // close the executor if we timed out
-                clientRequestExecutor.close();
+                pool.getFactory().destroy(destination, clientRequestExecutor);
             }
 
             if(logger.isDebugEnabled()) {
@@ -445,8 +445,7 @@ public class SocketStore implements Store<ByteArray, byte[], byte[]>, Nonblockin
                                      + ":"
                                      + clientRequestExecutor.getSocketChannel()
                                                             .socket()
-                                                            .getLocalPort() + " result: "
-                                     + o);
+                                                            .getLocalPort() + " result: " + o);
                     }
 
                     callback.requestComplete(o, requestTime);
