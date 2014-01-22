@@ -238,6 +238,7 @@
       <batchtest fork="yes" todir="${contribtestreport.dir}">
         <fileset dir="${contrib.classes.dir}">
           <include name="**/*Test.class" />
+          <exclude name="**/mr/*.class" />
           <exclude name="**/*PerformanceTest.class" />
           <exclude name="**/*RemoteTest.class" />
           <exclude name="**/Ec2*Test.class" />
@@ -399,6 +400,7 @@
         <fileset dir="${unittestsrc.dir}">
           <include name="**/*Test.java" />
           <exclude name="**/Abstract*.java" />
+          <exclude name="**/Mysql*.java" />
         </fileset>
       </batchtest>
     </junit>
@@ -419,6 +421,7 @@
       <batchtest todir="${longtestreport.dir}">
         <fileset dir="${longtestsrc.dir}">
           <include name="**/*Test.java" />
+          <exclude name="**/Mysql*.java" />
         </fileset>
       </batchtest>
     </junit>
