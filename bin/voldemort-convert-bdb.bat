@@ -31,9 +31,11 @@ set CLASSPATH=%CLASSPATH%;%1
 goto :eof
 
 :run
-set JVM_OPTS=-server -Xms2g -Xmx2g -XX:NewSize=1024m -XX:MaxNewSize=1024m -XX:+AlwaysPreTouch -XX:+UseCompressedOops -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=70 -XX:SurvivorRatio=2
+set JVM_OPTS=-server -Xms4g -Xmx4g -XX:NewSize=1024m -XX:MaxNewSize=1024m -XX:+AlwaysPreTouch -XX:+UseCompressedOops -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=70 -XX:SurvivorRatio=2
 
-java -Dlog4j.debug -Dlog4j.configuration="file:/%BASE_DIR%\src\java\log4j.properties" %JVM_OPTS% -cp %CLASSPATH% voldemort.store.bdb.dataconversion.BdbConvertData %*
+set LOG4J="%BASE_DIR%\dist\resources\log4j.properties"
+
+java -Dlog4j.debug -Dlog4j.configuration=file:/%LOG4J% %JVM_OPTS% -cp %CLASSPATH% voldemort.store.bdb.dataconversion.BdbConvertData %*
 
 endlocal
 :eof
