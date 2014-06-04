@@ -82,6 +82,11 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
                           SchedulerService scheduler) {
 
         super();
+
+        if(config == null) {
+            throw new IllegalArgumentException("ClientConfig is mandatory");
+        }
+
         this.storeName = Utils.notNull(storeName);
         this.resolver = resolver;
         this.abstractStoreFactory = Utils.notNull(storeFactory);
@@ -99,21 +104,15 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
         this.scheduler = scheduler;
 
         // Registering self to be able to bootstrap client dynamically via JMX
-        JmxUtils.registerMbean(this,
-                               JmxUtils.createObjectName(JmxUtils.getPackageName(this.getClass()),
-                                                         JmxUtils.getClassName(this.getClass())
-                                                                 + "." + storeName));
+        if(config.isJmxEnabled()) {
+            JmxUtils.registerMbean(this,
+                                   JmxUtils.createObjectName(JmxUtils.getPackageName(this.getClass()),
+                                                             JmxUtils.getClassName(this.getClass())
+                                                                     + "." + storeName));
+        }
 
         // Bootstrap this client
         bootStrap();
-
-        // Initialize the background thread for checking metadata version
-        if(config != null) {
-            asyncMetadataManager = scheduleAsyncMetadataVersionManager(clientId.toString(),
-                                                                       config.getAsyncMetadataRefreshInMs());
-            clientRegistryRefresher = registerClient(clientId,
-                                                     config.getClientRegistryUpdateIntervalInSecs());
-        }
 
         logger.info("Voldemort client created: " + clientId + "\n" + clientInfo);
     }
@@ -163,6 +162,7 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
             // Create a callback for re-bootstrapping the client
             Callable<Void> rebootstrapCallback = new Callable<Void>() {
 
+                @Override
                 public Void call() throws Exception {
                     bootStrap();
                     return null;
@@ -209,6 +209,17 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
                                               this.clusterXml,
                                               abstractStoreFactory.getFailureDetector());
 
+        // Initialize the background thread for checking metadata version
+        if(asyncMetadataManager == null) {
+            asyncMetadataManager = scheduleAsyncMetadataVersionManager(clientId.toString(),
+                                                                       config.getAsyncMetadataRefreshInMs());
+        }
+
+        if(clientRegistryRefresher == null) {
+            clientRegistryRefresher = registerClient(clientId,
+                                                     config.getClientRegistryUpdateIntervalInSecs());
+        }
+
         /*
          * Update to the new metadata versions (in case we got here from Invalid
          * Metadata exception). This will prevent another bootstrap via the
@@ -251,7 +262,7 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
      * Generate a unique client ID based on: 0. clientContext, if specified; 1.
      * storeName; 2. deployment path; 3. client sequence
      * 
-     * @param clientInfo 
+     * @param clientInfo
      * @return unique client ID
      */
     public String generateClientId(ClientInfo clientInfo) {
