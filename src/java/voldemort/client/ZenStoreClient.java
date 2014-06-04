@@ -64,6 +64,7 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
     private String clusterXml;
     private AsyncMetadataVersionManager asyncMetadataManager = null;
     private ClientRegistryRefresher clientRegistryRefresher = null;
+    private boolean everBootstrapped = false;
 
     public ZenStoreClient(String storeName,
                           InconsistencyResolver<Versioned<V>> resolver,
@@ -101,6 +102,7 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
         this.clientId = generateClientId(clientInfo);
         this.config = config;
         this.sysRepository = new SystemStoreRepository(config);
+        // Start up the scheduler
         this.scheduler = scheduler;
 
         // Registering self to be able to bootstrap client dynamically via JMX
@@ -113,6 +115,12 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
 
         // Bootstrap this client
         bootStrap();
+
+        // Initialize the background thread for checking metadata version
+        asyncMetadataManager = scheduleAsyncMetadataVersionManager(clientId.toString(),
+                                                                   config.getAsyncMetadataRefreshInMs());
+        clientRegistryRefresher = registerClient(clientId,
+                                                 config.getClientRegistryUpdateIntervalInSecs());
 
         logger.info("Voldemort client created: " + clientId + "\n" + clientInfo);
     }
@@ -209,17 +217,6 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
                                               this.clusterXml,
                                               abstractStoreFactory.getFailureDetector());
 
-        // Initialize the background thread for checking metadata version
-        if(asyncMetadataManager == null) {
-            asyncMetadataManager = scheduleAsyncMetadataVersionManager(clientId.toString(),
-                                                                       config.getAsyncMetadataRefreshInMs());
-        }
-
-        if(clientRegistryRefresher == null) {
-            clientRegistryRefresher = registerClient(clientId,
-                                                     config.getClientRegistryUpdateIntervalInSecs());
-        }
-
         /*
          * Update to the new metadata versions (in case we got here from Invalid
          * Metadata exception). This will prevent another bootstrap via the
@@ -240,11 +237,15 @@ public class ZenStoreClient<K, V> extends DefaultStoreClient<K, V> {
         }
 
         if(this.clientRegistryRefresher == null) {
-            logger.error("Unable to publish the client registry after bootstrap. Client Registry Refresher is NULL.");
+            if(everBootstrapped) {
+                logger.error("Unable to publish the client registry after bootstrap. Client Registry Refresher is NULL.");
+            }
         } else {
             logger.info("Publishing client registry after Bootstrap.");
             this.clientRegistryRefresher.publishRegistry();
         }
+
+        everBootstrapped = true;
     }
 
     public String getClientId() {
