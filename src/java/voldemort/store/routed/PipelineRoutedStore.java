@@ -913,7 +913,8 @@ public class PipelineRoutedStore extends RoutedStore {
 
         if(this.jmxEnabled) {
             JmxUtils.unregisterMbean(JmxUtils.createObjectName(JmxUtils.getPackageName(stats.getClass()),
-                                                               getName() + JmxUtils.getJmxId(jmxId)));
+                                                               getName() + "-"
+                                                                       + JmxUtils.getJmxId(jmxId)));
         }
 
         if(exception != null)
