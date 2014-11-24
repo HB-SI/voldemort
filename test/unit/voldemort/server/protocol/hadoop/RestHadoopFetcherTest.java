@@ -157,6 +157,7 @@ public class RestHadoopFetcherTest {
                                                                 .setRequiredWrites(1)
                                                                 .build();
             File file = File.createTempFile("ro-stores-", ".xml");
+            file.deleteOnExit();
             FileUtils.writeStringToFile(file,
                                         new StoreDefinitionsMapper().writeStoreList(Lists.newArrayList(store)));
             String storeXmlFile = file.getAbsolutePath();
@@ -212,6 +213,7 @@ public class RestHadoopFetcherTest {
                                                                 .setRequiredWrites(1)
                                                                 .build();
             File file = File.createTempFile("ro-stores-", ".xml");
+            file.deleteOnExit();
             FileUtils.writeStringToFile(file,
                                         new StoreDefinitionsMapper().writeStoreList(Lists.newArrayList(store)));
             String storeXmlFile = file.getAbsolutePath();

@@ -137,6 +137,7 @@ public class ZonedRebalanceNonContiguousZonesTest extends AbstractRebalanceTest 
 
         z1z3Stores = ClusterTestUtils.getZ1Z3StoreDefsBDB();
         File z1z3file = File.createTempFile("z1z3-stores-", ".xml");
+        z1z3file.deleteOnExit();
         FileUtils.writeStringToFile(z1z3file, new StoreDefinitionsMapper().writeStoreList(z1z3Stores));
         z1z3StoresXml = z1z3file.getAbsolutePath();
 
@@ -147,6 +148,7 @@ public class ZonedRebalanceNonContiguousZonesTest extends AbstractRebalanceTest 
 
         z1z3z5Stores = ClusterTestUtils.getZ1Z3Z5StoreDefsBDB();
         File z1z3z5file = File.createTempFile("z1z3z5-stores-", ".xml");
+        z1z3z5file.deleteOnExit();
         FileUtils.writeStringToFile(z1z3z5file, new StoreDefinitionsMapper().writeStoreList(z1z3z5Stores));
         z1z3z5StoresXml = z1z3z5file.getAbsolutePath();
     }
@@ -176,6 +178,7 @@ public class ZonedRebalanceNonContiguousZonesTest extends AbstractRebalanceTest 
         storeDefWithoutReplication = Lists.newArrayList(rwStoreDefWithoutReplication);
         String storeDefWithoutReplicationString = new StoreDefinitionsMapper().writeStoreList(storeDefWithoutReplication);
         File file = File.createTempFile("two-stores-", ".xml");
+        file.deleteOnExit();
         FileUtils.writeStringToFile(file, storeDefWithoutReplicationString);
         storeDefFileWithoutReplication = file.getAbsolutePath();
 
@@ -217,11 +220,13 @@ public class ZonedRebalanceNonContiguousZonesTest extends AbstractRebalanceTest 
                                                                  .build();
 
         file = File.createTempFile("rw-stores-", ".xml");
+        file.deleteOnExit();
         FileUtils.writeStringToFile(file,
                                     new StoreDefinitionsMapper().writeStoreList(Lists.newArrayList(rwStoreDefWithReplication)));
         rwStoreDefFileWithReplication = file.getAbsolutePath();
 
         file = File.createTempFile("rw-two-stores-", ".xml");
+        file.deleteOnExit();
         FileUtils.writeStringToFile(file,
                                     new StoreDefinitionsMapper().writeStoreList(Lists.newArrayList(rwStoreDefWithReplication,
                                                                                                    rwStoreDefWithReplication2)));
@@ -230,6 +235,7 @@ public class ZonedRebalanceNonContiguousZonesTest extends AbstractRebalanceTest 
         storeDefWithReplication = Lists.newArrayList(rwStoreDefWithReplication);
         String storeDefWithReplicationString = new StoreDefinitionsMapper().writeStoreList(storeDefWithReplication);
         file = File.createTempFile("two-stores-", ".xml");
+        file.deleteOnExit();
         FileUtils.writeStringToFile(file, storeDefWithReplicationString);
         storeDefFileWithReplication = file.getAbsolutePath();
     }

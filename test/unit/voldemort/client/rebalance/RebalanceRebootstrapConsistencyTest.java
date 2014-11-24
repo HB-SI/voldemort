@@ -152,6 +152,7 @@ public class RebalanceRebootstrapConsistencyTest {
 
         // create a temp file
         File tempStoresXml = File.createTempFile("tempfile", ".tmp");
+        tempStoresXml.deleteOnExit();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempStoresXml));
         bw.write(storesXmlStr);

@@ -346,6 +346,7 @@ public class BdbStorageEngineTest extends AbstractStorageEngineTest {
     @Test
     public void testNativeBackup() throws Exception {
         File backupToDir = File.createTempFile("bdb-storage", "bkp");
+        backupToDir.deleteOnExit();
         backupToDir.delete();
         backupToDir.mkdir();
         try {

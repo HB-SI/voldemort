@@ -100,6 +100,7 @@ public class RepairJobTest {
         File file = null;
         try {
             file = File.createTempFile("single-store-", ".xml");
+            file.deleteOnExit();
             FileUtils.writeStringToFile(file, storeDefsString);
             String storeDefFile = file.getAbsolutePath();
             List<Integer> nodesToStart = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8);

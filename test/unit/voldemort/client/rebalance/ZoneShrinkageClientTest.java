@@ -54,6 +54,7 @@ public class ZoneShrinkageClientTest {
         targetStoreDefs = RebalanceUtils.dropZone(sourceStoreDefs, DROP_ZONE_ID);
 
         File sourceStoreDefsXml = File.createTempFile("zzz-stores-", ".xml");
+        sourceStoreDefsXml.deleteOnExit();
         FileUtils.writeStringToFile(sourceStoreDefsXml,
                                     new StoreDefinitionsMapper().writeStoreList(sourceStoreDefs));
         servers = new VoldemortServer[sourceCluster.getNumberOfNodes()];
