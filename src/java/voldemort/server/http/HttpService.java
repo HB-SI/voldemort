@@ -58,7 +58,7 @@ public class HttpService extends AbstractService {
     private Server httpServer;
     private Context context;
 
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
     public HttpService(VoldemortServer server,
                        StorageService storageService,
                        StoreRepository storeRepository,
