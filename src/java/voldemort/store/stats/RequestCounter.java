@@ -234,7 +234,7 @@ public class RequestCounter {
     }
 
     public String getDisplayThroughput() {
-        return String.format("%.2f", getThroughput());
+        return String.format("%.2f", getThroughput()).replaceAll(",",".");
     }
 
     public double getAverageTimeInMs() {
@@ -242,7 +242,7 @@ public class RequestCounter {
     }
 
     public String getDisplayAverageTimeInMs() {
-        return String.format("%.4f", getAverageTimeInMs());
+        return String.format("%.4f", getAverageTimeInMs()).replaceAll(",",".");
     }
 
     public long getMaxLatencyInMs() {
