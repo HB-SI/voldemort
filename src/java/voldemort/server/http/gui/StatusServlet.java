@@ -168,8 +168,9 @@ public class StatusServlet extends HttpServlet {
                         continue;
                     }
                     sb.append(fillCommonStats(stats, t));
+                    sb.append(",");
                 }
-                sb.append(",\n        \"num_exceptions\": ");
+                sb.append("\n        \"num_exceptions\": ");
                 sb.append(statStore.getStats().getCount(Tracked.EXCEPTION));
                 sb.append("\n");
                 sb.append("    }");
@@ -183,8 +184,9 @@ public class StatusServlet extends HttpServlet {
                         continue;
                     }
                     sb.append(fillCommonStats(stats, t));
+                    sb.append(",");
                 }
-                sb.append(",\n        \"num_exceptions\": ");
+                sb.append("\n        \"num_exceptions\": ");
                 sb.append(quotaStore.getStats().getCount(Tracked.EXCEPTION));
                 sb.append("\n");
                 sb.append("    }");
